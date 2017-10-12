@@ -77,7 +77,7 @@ func handleBarDemo() {
 // https://www.npmjs.com/package/just-handlebars-helpers
 
 // gt will attempt to coerce both a and b into floats and return true
-// if a < b, otherise false
+// if a > b, otherise false
 func gt(a interface{}, b interface{}, options *raymond.Options) bool {
 
 	if a == nil || b == nil {
