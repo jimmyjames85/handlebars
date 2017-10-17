@@ -6,24 +6,101 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/aymerick/raymond"
+	"github.com/jimmyjames85/handlebars/dfs"
 )
 
+/*
+
+ */
+
+func modifyBytes(data []byte) {
+	data[3] = 'A'
+}
+
+func newLibDemo() {
+
+	maxDepth := 8
+	// maxWidth := 10
+
+	payloadDepth := 8 //3
+	payloadWidth := 8 // 140
+
+	start := time.Now()
+	payload, err := dfs.CreateTestJson(payloadWidth, payloadDepth)
+
+	//payload = []byte(fmt.Sprintf(`{"top":[{}%s]}`, strings.Repeat(",{}", 10500000)))
+
+	if err != nil {
+		log.Fatalf("could not create test JSON: %v", err)
+	}
+	fmt.Printf("creation time: %v\tsize: %0.02f kb\n", time.Now().Sub(start), dfs.KB(payload))
+	// fmt.Printf("%s\n", payload)
+
+	start = time.Now()
+	d, err := dfs.CalculateJsonDepth(payload, maxDepth)
+	fmt.Printf("depth = %d   calc json depth time: %v\n", d, time.Now().Sub(start))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
 func main() {
-	handleBarDemo()
-	//handleDFSDemo()
+	newLibDemo()
+	//handleBarDemo()
+	//dfsDemo()
+}
+
+/*
+
+ */
+
+func dfsDemo() {
+
+	maxDepth := 3
+	maxWidth := 10
+
+	payloadDepth := 40
+	payloadWidth := 10
+
+	start := time.Now()
+	payload, err := dfs.CreateTestJson(payloadWidth, payloadDepth)
+
+	byteSize := float64(len(payload))
+
+	//fmt.Printf("%s\n", string(payload))
+
+	fmt.Printf("payload size: %0.2f kb\t creation time: %v\n", (byteSize / 1024), start.Sub(time.Now()))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	d := dfs.New(maxWidth, maxDepth)
+
+	//d.Debug = true
+
+	err = d.Validate(payload)
+	if err != nil {
+		log.Fatalf("err validating: %v", err)
+	}
 }
 
 var jsonPayload = `
 {
+    "bomb": { "bomb1": [2,2,3,4, [[],[],[],[{"bomb2":[{"bomb3":[]}]}]],[],[]]},
+    "someObj": {"a":"b","c":"d","e":"f","g":"h"},
+    "someArr": ["a","b","c","d","e","f","g"],
     "people": [
         "marcel marcel marcel",
         "jean claud",
         "ronald McDonald",
 	{"obj":true, "arr": ["bar", "baz", {"this":"map will be coerced into a string"}], "arrSize": 3},
 	{"obj":true, "arr":[11,22,33,44], "arrSize": 4},
-	{"obj":true, "arr":[55,66,77,88], "arrSize": 4, "subObj": {"foo":"bar"}},
+	{"obj":true, "arr":[55,66,77,88], "arrSize": 4, "subObj": {"foo":"bar", "biz":"baz"}, "somArr": ["a","b","c","d","e","f","g","h"]},
 	"Jon jacob jingleheimerschmidt"
     ]
 }`
